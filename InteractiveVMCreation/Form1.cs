@@ -17,9 +17,19 @@ namespace InteractiveVMCreation
 {
     public partial class Form1 : Form
     {
+        //Microsoft.Azure.Management.ResourceManager.Fluent.Core.Region inputRegion;
         public Form1()
         {
             InitializeComponent();
+
+            IEnumerator<Microsoft.Azure.Management.ResourceManager.Fluent.Core.Region> e = Microsoft.Azure.Management.ResourceManager.Fluent.Core.Region.Values.GetEnumerator();
+            while (e.MoveNext())
+            {
+                Microsoft.Azure.Management.ResourceManager.Fluent.Core.Region r = e.Current;
+                comboBox1.Items.Add(r.Name);
+            }
+
+            for (int i = 0; i <= 5; i++) comboBox2.Items.Add((KnownLinuxVirtualMachineImage)i);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -28,13 +38,16 @@ namespace InteractiveVMCreation
 
             IAzure azure = Azure.Authenticate(authProperties).WithDefaultSubscription();
 
-            var linuxVM = azure.VirtualMachines.Define("linux")
-                .WithRegion(Microsoft.Azure.Management.ResourceManager.Fluent.Core.Region.UKWest)
-                .WithNewResourceGroup("test-vm-app")
+            var linuxVM = azure.VirtualMachines.Define(textBox1.Text)
+                //.WithRegion(Microsoft.Azure.Management.ResourceManager.Fluent.Core.Region.UKWest)
+                //.WithRegion("UKWEST")
+                .WithRegion(comboBox1.SelectedItem.ToString())
+                .WithNewResourceGroup(textBox2.Text)
                 .WithNewPrimaryNetwork("10.0.0.0/28")
                 .WithPrimaryPrivateIPAddressDynamic()
-                .WithNewPrimaryPublicIPAddress("cressyjtest")
-                .WithPopularLinuxImage(KnownLinuxVirtualMachineImage.CentOS7_2)
+                .WithNewPrimaryPublicIPAddress(textBox3.Text)
+                //.WithPopularLinuxImage(KnownLinuxVirtualMachineImage.CentOS7_2)
+                .WithPopularLinuxImage((KnownLinuxVirtualMachineImage)comboBox2.SelectedIndex)
                 .WithRootUsername("james")
                 .WithRootPassword("SuperSecret-123();")
                 .WithSize(VirtualMachineSizeTypes.StandardA1v2);
